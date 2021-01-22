@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PDF development</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 98vh;
+        }
+        .center {
+            align-self: center;
+        }
+        #urlPath {
+            display: inline-block;
+            width: 500px;
+        }
+        #templateParams {
+            width: 1000px;
+            height: 100px;
+        }
+        #pdfPreview {
+            width: 100%;
+            flex: 1;
+        }
+    </style>
+    <script>
+        function generate() {
+            var urlPath = document.getElementById('urlPath').value;
+            var templateParams = document.getElementById('templateParams').value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", urlPath);
+            xhr.responseType = 'blob';
+
+            xhr.onload = function() {
+                if (this.status == 200) {
+                    var blob = new Blob([this.response], {type: 'application/pdf'});
+                    var url = URL.createObjectURL(blob);
+                    var pdfPreview = document.getElementById('pdfPreview');
+                    pdfPreview.setAttribute('src', url);
+                }
+            };
+            xhr.send(templateParams);
+        }
+    </script>
+</head>
+<body>
+    <div class="center">
+        <input id="urlPath" type="text">
+        <button onclick="generate()" accesskey="r">Generate</button>
+    </div>
+    <textarea id="templateParams" class="center"></textarea>
+    <iframe id="pdfPreview"></iframe>
+</body>
+</html>

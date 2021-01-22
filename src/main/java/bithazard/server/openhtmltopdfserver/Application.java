@@ -32,11 +32,13 @@ public class Application {
     }
 
     @Bean
-    Handlebars handlebars() {
+    Handlebars handlebars(@Value("${handlebars.template.hot-reload:false}") boolean templateHotReload) {
         Handlebars handlebars = new Handlebars();
         handlebars.registerHelper("json", Jackson2Helper.INSTANCE);
         handlebars.with(new FileTemplateLoader(new File("").getAbsolutePath(), ""));
-        handlebars.with(new HighConcurrencyTemplateCache());
+        HighConcurrencyTemplateCache templateCache = new HighConcurrencyTemplateCache();
+        templateCache.setReload(templateHotReload);
+        handlebars.with(templateCache);
         return handlebars;
     }
 
