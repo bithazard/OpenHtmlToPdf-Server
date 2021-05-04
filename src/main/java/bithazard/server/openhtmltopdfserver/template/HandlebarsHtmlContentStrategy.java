@@ -1,4 +1,4 @@
-package bithazard.server.openhtmltopdfserver.document;
+package bithazard.server.openhtmltopdfserver.template;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -8,10 +8,7 @@ import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.JsonNodeValueResolver;
 import com.github.jknack.handlebars.Template;
 import lombok.RequiredArgsConstructor;
-import org.jsoup.Jsoup;
-import org.jsoup.helper.W3CDom;
 import org.springframework.stereotype.Component;
-import org.w3c.dom.Document;
 
 import javax.annotation.PostConstruct;
 import java.io.FileNotFoundException;
@@ -19,37 +16,30 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
-class HandlebarsHtmlDocumentStrategy implements HtmlDocumentStrategy {
-    private final HtmlDocumentStrategyFactory htmlDocumentStrategyFactory;
+class HandlebarsHtmlContentStrategy implements HtmlContentStrategy {
+    private final HtmlContentStrategyFactory htmlContentStrategyFactory;
     private final Handlebars handlebars;
     private final ObjectMapper objectMapper;
-    private final W3CDom w3CDom;
 
     @PostConstruct
     private void postConstruct() {
-        htmlDocumentStrategyFactory.registerStrategy("hbs", this.getClass());
+        htmlContentStrategyFactory.registerStrategy("hbs", this.getClass());
     }
 
     @Override
-    public Document createDocument(String filepath, String templateParams) throws IOException {
-        Context context = getContextFromJson(templateParams);
+    public String createHtml(String filepath, String templateParams) throws IOException {
         Template template;
         try {
             template = handlebars.compile(filepath);
         } catch (FileNotFoundException ex) {
             throw new FileNotFoundException("The template " + ex.getMessage() + " was not found.");
         }
-        String html = template.apply(context);
-        return getW3cDocumentFromHtml(html);
+        Context context = getContextFromJson(templateParams);
+        return template.apply(context);
     }
 
     private Context getContextFromJson(String json) throws JsonProcessingException {
         JsonNode jsonNode = objectMapper.readValue(json, JsonNode.class);
         return Context.newBuilder(jsonNode).resolver(JsonNodeValueResolver.INSTANCE).build();
-    }
-
-    private Document getW3cDocumentFromHtml(String html) {
-        org.jsoup.nodes.Document jSoupDocument = Jsoup.parse(html);
-        return w3CDom.fromJsoup(jSoupDocument);
     }
 }

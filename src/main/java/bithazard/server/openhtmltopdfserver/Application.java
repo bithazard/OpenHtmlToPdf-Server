@@ -55,7 +55,7 @@ public class Application {
     }
 
     @Bean(name = "basePath")
-    File basePath(@Value("${root.dir:documents}") String rootDir) {
+    File basePath(@Value("${root.dir:templates}") String rootDir) {
         return new File(rootDir);
     }
 }

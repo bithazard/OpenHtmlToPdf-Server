@@ -14,42 +14,49 @@
             display: inline-block;
             width: 500px;
         }
+        #errorMessage {
+            color: red;
+        }
         #templateParams {
             width: 1000px;
             height: 100px;
         }
-        #pdfPreview {
+        #preview {
             width: 100%;
             flex: 1;
         }
     </style>
     <script>
         function generate() {
-            var xhr = new XMLHttpRequest();
-            var urlPath = document.getElementById('urlPath').value;
+            const xhr = new XMLHttpRequest();
+            const urlPath = document.getElementById('urlPath').value;
             xhr.open("POST", urlPath);
             xhr.responseType = 'blob';
 
-            var pdfPreview = document.getElementById('pdfPreview');
+            const preview = document.getElementById('preview');
+            const errorMessage = document.getElementById('errorMessage');
             xhr.onload = function() {
                 if (this.status === 200) {
-                    var blob = new Blob([this.response], {type: 'application/pdf'});
-                    var url = URL.createObjectURL(blob);
-                    pdfPreview.setAttribute('src', url);
+                    errorMessage.innerHTML = "";
+                    const url = URL.createObjectURL(this.response);
+                    preview.setAttribute('src', url);
+                } else {
+                    this.response.text().then(text => errorMessage.innerHTML = JSON.parse(text).error);
                 }
             };
 
-            var templateParams = document.getElementById('templateParams').value;
+            const templateParams = document.getElementById('templateParams').value;
             xhr.send(templateParams);
         }
     </script>
 </head>
 <body>
     <div>
-        <input id="urlPath" type="text">
+        <input id="urlPath" type="text" value="http://localhost:8080/pdf/">
         <button onclick="generate()" accesskey="r">Generate</button>
     </div>
+    <div id="errorMessage"></div>
     <textarea id="templateParams"></textarea>
-    <iframe id="pdfPreview"></iframe>
+    <iframe id="preview"></iframe>
 </body>
 </html>

@@ -1,4 +1,4 @@
-package bithazard.server.openhtmltopdfserver.document;
+package bithazard.server.openhtmltopdfserver.template;
 
 public class UnknownExtensionException extends RuntimeException {
     public UnknownExtensionException(String message) {
